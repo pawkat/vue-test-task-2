@@ -2,3 +2,30 @@
 //
 // The variables you want to modify
 // $font-size-root: 20px;
+
+$dark-gray: #1F1F1F;
+
+$md: 768;
+// width
+@mixin r($width) {
+  @media only screen and (max-width: $width+ "px") {
+    @content
+  }
+}
+
+@mixin rmin($width) {
+  @media only screen and (min-width: $width+ "px") {
+    @content
+  }
+}
+@mixin md {
+  @include rmin($md) {
+    @content
+  }
+}
+
+@mixin md-max {
+  @include r($md - 1) {
+    @content
+  }
+}

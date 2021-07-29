@@ -98,8 +98,13 @@ export default {
       items: [
         {
           icon: 'mdi-apps',
-          title: 'Welcome',
+          title: 'Image Gallery',
           to: '/'
+        },
+        {
+          icon: 'mdi-apps',
+          title: 'Welcome',
+          to: '/welcome'
         },
         {
           icon: 'mdi-chart-bubble',
