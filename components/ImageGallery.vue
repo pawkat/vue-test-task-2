@@ -1,7 +1,7 @@
 <template>
-  <div v-if="responseData && responseData.pictures">
+  <div>
     <v-row>
-      <v-col cols="6" md="3" sm="4" v-for="picture in responseData.pictures" :key="picture.id">
+      <v-col cols="6" md="3" sm="4" v-for="picture in data.pictures" :key="picture.id">
         <v-dialog
             v-model="picture.dialog"
             fullscreen
@@ -58,8 +58,8 @@
     <v-row>
       <v-col cols="12">
         <v-pagination
-            v-model="page"
-            :length="responseData.pageCount"
+            v-model="currentPage"
+            :length="data.pageCount"
             :total-visible="6"
         ></v-pagination>
       </v-col>
@@ -70,57 +70,26 @@
 <script>
 
 export default {
+  props: ['data', 'page'],
   data() {
     return {
-      auth: false,
-      token: '',
-      responseData: false,
-      page: 1
+      currentPage: this.page
     }
   },
   methods: {
-    async asyncAuth({$axios}) {
-      const ip = await $axios.$post('http://interview.agileengine.com/auth', {
-        apiKey: '23567b218376f79d9415',
-      });
-      if (ip.auth && ip.token) {
-        this.auth = ip.auth;
-        this.token = ip.token;
-        this.getData(this);
-      } else {
-        alert('Something went wrong.');
-      }
-    },
-    async getData({$axios}) {
-      const url = this.page > 1 ? `http://interview.agileengine.com/images?page=${this.page}` : 'http://interview.agileengine.com/images';
-      const ip = await $axios.$get(url, {
-        headers: {'Authorization': this.token},
-      });
-      if (ip.pictures) {
-        ip.pictures.map((picture) => {
-          picture.dialog = false
-          return picture;
-        })
-        this.responseData = ip;
-      } else {
-        alert('Something went wrong.');
-      }
-    },
     async loadPictureData(picture) {
       const ip = await this.$axios.$get(`http://interview.agileengine.com/images/${picture.id}`, {
         headers: {'Authorization': this.token},
       });
       if (ip) {
-        this.$set(this.responseData.pictures[this.responseData.pictures.indexOf(picture)], 'data', ip)
+        this.$set(this.data.pictures[this.data.pictures.indexOf(picture)], 'data', ip)
       }
     }
   },
-  mounted() {
-    this.asyncAuth(this);
-  },
   watch: {
-    page() {
-      this.getData(this);
+    currentPage(event) {
+      this.$emit('pageChange', this.currentPage)
+      // this.getData(this);
     }
   }
 }
