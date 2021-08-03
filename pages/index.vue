@@ -1,7 +1,7 @@
 <template>
   <v-row justify="center" align="center">
     <v-col cols="12" id="content">
-      <ImageGallery :data="responseData" :page="page" v-if="hasData" @pageChange="pageChange"/>
+      <ImageGallery :data="responseData" :page="page" :token="token" v-if="hasData" @pageChange="pageChange"/>
     </v-col>
   </v-row>
 </template>
@@ -21,11 +21,12 @@ export default {
   methods: {
     async asyncAuth({$axios}) {
       const ip = await $axios.$post('http://interview.agileengine.com/auth', {
-        apiKey: '23567b218376f79d9415',
+        apiKey: process.env.API_KEY,
       });
       if (ip.auth && ip.token) {
-        this.auth = ip.auth;
-        this.token = ip.token;
+        const {auth, token} = ip;
+        this.auth = auth;
+        this.token = token;
         this.getData(this);
       } else {
         alert('Something went wrong.');

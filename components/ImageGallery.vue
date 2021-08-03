@@ -1,58 +1,50 @@
 <template>
   <div>
-    <v-row>
-      <v-col cols="6" md="3" sm="4" v-for="picture in data.pictures" :key="picture.id">
-        <v-dialog
-            v-model="picture.dialog"
-            fullscreen
-            hide-overlay
-            transition="dialog-bottom-transition"
-        >
-          <template v-slot:activator="{ on, attrs }">
-            <v-card class="image-card" :style="{backgroundImage: `url('${picture.cropped_picture}')`}" v-bind="attrs"
-                    @click="loadPictureData(picture)"
-                    v-on="on">
-            </v-card>
-          </template>
-          <v-card>
-            <v-toolbar
-                dark
-                color="primary"
-            >
-              <v-btn
-                  icon
-                  dark
-                  @click="picture.dialog = false"
-              >
-                <v-icon>mdi-close</v-icon>
-              </v-btn>
-              <v-toolbar-title>{{ picture.data ? picture.data.author : 'Loading...' }}</v-toolbar-title>
-              <v-spacer></v-spacer>
+    <v-dialog
+        v-model="dialog"
+        fullscreen
+        hide-overlay
+        transition="dialog-bottom-transition">
+      <v-card>
+        <v-toolbar dark color="primary">
+          <v-btn
+              icon
+              dark
+              @click="dialog = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+          <v-toolbar-title>{{ dialogPicture ? dialogPicture.author : 'Loading...' }}</v-toolbar-title>
+          <v-spacer></v-spacer>
+        </v-toolbar>
+        <div v-if="dialogPicture">
+          <div class="image-info">
+            <div class="image-info__img">
+              <img :src="dialogPicture.full_picture" v-if="dialogPicture.full_picture" alt=""/>
 
-            </v-toolbar>
-            <div v-if="picture.data">
-              <div class="image-info">
-                <div class="image-info__img">
-                  <img src="http://interview.agileengine.com/pictures/full_size/0002.jpg" alt=""/>
-
-                  <div class="image-info__author" v-if="picture.data.author">
-                    Author: {{ picture.data.author }}
-                  </div>
-                  <div class="image-info__footer" v-if="picture.data.camera || picture.data.tags">
-                    <div class="image-info__camera" v-if="picture.data.camera">
-                      Camera: {{ picture.data.camera }}
-                    </div>
-                    <div class="image-info__tags" v-if="picture.data.tags">
-                      {{ picture.data.tags }}
-                    </div>
-                  </div>
+              <div class="image-info__author" v-if="dialogPicture.author">
+                Author: {{ dialogPicture.author }}
+              </div>
+              <div class="image-info__footer" v-if="dialogPicture.camera || dialogPicture.tags">
+                <div class="image-info__camera" v-if="dialogPicture.camera">
+                  Camera: {{ dialogPicture.camera }}
+                </div>
+                <div class="image-info__tags" v-if="dialogPicture.tags">
+                  {{ dialogPicture.tags }}
                 </div>
               </div>
-              <div class="large-image">
-              </div>
             </div>
-          </v-card>
-        </v-dialog>
+          </div>
+          <div class="large-image">
+          </div>
+        </div>
+      </v-card>
+    </v-dialog>
+
+    <v-row>
+      <v-col cols="6" md="3" sm="4" v-for="picture in data.pictures" :key="picture.id">
+        <v-card class="image-card" :style="{backgroundImage: `url('${picture.cropped_picture}')`}"
+                @click="loadDialogPicture(picture)">
+        </v-card>
       </v-col>
     </v-row>
     <v-row>
@@ -70,26 +62,28 @@
 <script>
 
 export default {
-  props: ['data', 'page'],
+  props: ['data', 'page', 'token'],
   data() {
     return {
-      currentPage: this.page
+      currentPage: this.page,
+      dialog: false,
+      dialogPicture: false
     }
   },
   methods: {
-    async loadPictureData(picture) {
+    async loadDialogPicture(picture) {
       const ip = await this.$axios.$get(`http://interview.agileengine.com/images/${picture.id}`, {
         headers: {'Authorization': this.token},
       });
       if (ip) {
-        this.$set(this.data.pictures[this.data.pictures.indexOf(picture)], 'data', ip)
+        this.dialogPicture = ip
+        this.dialog = true
       }
     }
   },
   watch: {
     currentPage(event) {
       this.$emit('pageChange', this.currentPage)
-      // this.getData(this);
     }
   }
 }
