@@ -13,23 +13,23 @@
               @click="dialog = false">
             <v-icon>mdi-close</v-icon>
           </v-btn>
-          <v-toolbar-title>{{ dialogPicture ? dialogPicture.author : 'Loading...' }}</v-toolbar-title>
+          <v-toolbar-title>{{ FULL_PICTURE_DATA ? FULL_PICTURE_DATA.author : 'Loading...' }}</v-toolbar-title>
           <v-spacer></v-spacer>
         </v-toolbar>
-        <div v-if="dialogPicture">
+        <div v-if="FULL_PICTURE_DATA">
           <div class="image-info">
             <div class="image-info__img">
-              <img :src="dialogPicture.full_picture" v-if="dialogPicture.full_picture" alt=""/>
+              <img :src="FULL_PICTURE_DATA.full_picture" v-if="FULL_PICTURE_DATA.full_picture" alt=""/>
 
-              <div class="image-info__author" v-if="dialogPicture.author">
-                Author: {{ dialogPicture.author }}
+              <div class="image-info__author" v-if="FULL_PICTURE_DATA.author">
+                Author: {{ FULL_PICTURE_DATA.author }}
               </div>
-              <div class="image-info__footer" v-if="dialogPicture.camera || dialogPicture.tags">
-                <div class="image-info__camera" v-if="dialogPicture.camera">
-                  Camera: {{ dialogPicture.camera }}
+              <div class="image-info__footer" v-if="FULL_PICTURE_DATA.camera || FULL_PICTURE_DATA.tags">
+                <div class="image-info__camera" v-if="FULL_PICTURE_DATA.camera">
+                  Camera: {{ FULL_PICTURE_DATA.camera }}
                 </div>
-                <div class="image-info__tags" v-if="dialogPicture.tags">
-                  {{ dialogPicture.tags }}
+                <div class="image-info__tags" v-if="FULL_PICTURE_DATA.tags">
+                  {{ FULL_PICTURE_DATA.tags }}
                 </div>
               </div>
             </div>
@@ -43,7 +43,7 @@
     <v-row>
       <v-col cols="6" md="3" sm="4" v-for="picture in data.pictures" :key="picture.id">
         <v-card class="image-card" :style="{backgroundImage: `url('${picture.cropped_picture}')`}"
-                @click="loadDialogPicture(picture)">
+                @click="openModal(picture)">
         </v-card>
       </v-col>
     </v-row>
@@ -60,6 +60,7 @@
 </template>
 
 <script>
+import {mapActions, mapGetters} from 'vuex'
 
 export default {
   props: ['data', 'page', 'token'],
@@ -67,18 +68,20 @@ export default {
     return {
       currentPage: this.page,
       dialog: false,
-      dialogPicture: false
     }
   },
+  computed: {
+    ...mapGetters([
+      'FULL_PICTURE_DATA',
+    ])
+  },
   methods: {
-    async loadDialogPicture(picture) {
-      const ip = await this.$axios.$get(`http://interview.agileengine.com/images/${picture.id}`, {
-        headers: {'Authorization': this.token},
-      });
-      if (ip) {
-        this.dialogPicture = ip
-        this.dialog = true
-      }
+    ...mapActions([
+      'LOAD_FULL_PICTURE_DATA',
+    ]),
+    openModal(picture) {
+      this.dialog = true;
+      this.LOAD_FULL_PICTURE_DATA(picture);
     }
   },
   watch: {
